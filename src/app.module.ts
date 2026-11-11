@@ -4,6 +4,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { CommonModule } from './common/common.module';
 import { SkillEntity } from './skill/entities/skill.entity';
 import { SkillModule } from './skill/skill.module';
+import { UserEntity } from './user/entities/user.entity';
+import { UserModule } from './user/user.module';
 
 @Module({
   imports: [
@@ -14,10 +16,11 @@ import { SkillModule } from './skill/skill.module';
       useFactory: (configService: ConfigService) => ({
         type: 'postgres',
         url: configService.get<string>('DATABASE_URL'),
-        entities: [SkillEntity],
+        entities: [UserEntity, SkillEntity],
         synchronize: true,
       }),
     }),
+    UserModule,
     SkillModule,
   ],
 })
