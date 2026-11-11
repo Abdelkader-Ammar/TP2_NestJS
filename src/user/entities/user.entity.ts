@@ -1,5 +1,6 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { TimestampEntity } from '../../common/entities/timestamp.entity';
+import { CvEntity } from '../../cv/entities/cv.entity';
 import { DEFAULT_ROLE } from '../roles';
 
 @Entity('users')
@@ -18,4 +19,7 @@ export class UserEntity extends TimestampEntity {
 
   @Column({ length: 30, default: DEFAULT_ROLE })
   role: string;
+
+  @OneToMany(() => CvEntity, (cv) => cv.user)
+  cvs: CvEntity[];
 }
