@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { AuthModule } from './auth/auth.module';
 import { CommonModule } from './common/common.module';
 import { CvEntity } from './cv/entities/cv.entity';
 import { CvModule } from './cv/cv.module';
@@ -25,6 +26,7 @@ import { UserModule } from './user/user.module';
     UserModule,
     SkillModule,
     CvModule,
+    AuthModule,
   ],
 })
 export class AppModule {}
