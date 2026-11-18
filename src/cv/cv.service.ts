@@ -1,4 +1,4 @@
-import { ConflictException, ForbiddenException, Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CrudService } from '../common/crud/crud.service';
@@ -18,8 +18,8 @@ export class CvService extends CrudService<CvEntity> {
     super(repository, 'Cv');
   }
 
+  // Un CIN déjà utilisé est rejeté par la contrainte unique et converti en 409 par UniqueViolationFilter.
   async createForUser({ skillIds, ...fields }: CreateCvDto, user: Pick<UserEntity, 'id'>): Promise<CvEntity> {
-    await this.assertCinAvailable(fields.cin);
     const skills = await this.skillService.findByIds(skillIds ?? []);
     return this.create({ ...fields, skills, userId: user.id });
   }
@@ -36,13 +36,9 @@ export class CvService extends CrudService<CvEntity> {
   }
 
   async updateForUser(id: number, { skillIds, ...fields }: UpdateCvDto, user: UserEntity): Promise<CvEntity> {
-    const cv = await this.findOne(id);
-    this.assertOwner(cv, user);
-    if (fields.cin !== undefined && fields.cin !== cv.cin) await this.assertCinAvailable(fields.cin);
-    const skills = skillIds === undefined ? cv.skills : await this.skillService.findByIds(skillIds);
-    const updated = await this.repository.preload({ id, ...fields, skills });
-    if (!updated) this.notFound(id);
-    return this.repository.save(updated);
+    this.assertOwner(await this.findOne(id), user);
+    const skills = skillIds === undefined ? undefined : await this.skillService.findByIds(skillIds);
+    return this.update(id, { ...fields, ...(skills && { skills }) });
   }
 
   async removeForUser(id: number, user: UserEntity): Promise<void> {
@@ -53,12 +49,6 @@ export class CvService extends CrudService<CvEntity> {
   private assertOwner(cv: CvEntity, user: UserEntity): void {
     if (cv.userId !== user.id) {
       throw new ForbiddenException(`Le Cv ${cv.id} appartient à un autre utilisateur.`);
-    }
-  }
-
-  private async assertCinAvailable(cin: number): Promise<void> {
-    if (await this.repository.count({ where: { cin } })) {
-      throw new ConflictException(`Un Cv avec le CIN ${cin} existe déjà.`);
     }
   }
 }

@@ -11,24 +11,20 @@ export class UserService extends CrudService<UserEntity> {
   }
 
   findById(id: number): Promise<UserEntity | null> {
-    return this.repository.findOneBy({ id });
+    return this.repository.findOne({ where: { id } });
   }
 
   findByUsername(username: string): Promise<UserEntity | null> {
-    return this.repository.findOneBy({ username });
+    return this.repository.findOne({ where: { username } });
   }
 
+  // password est en select: false, on le sélectionne explicitement avec le QueryBuilder.
   findByUsernameWithPassword(username: string): Promise<UserEntity | null> {
     return this.repository
       .createQueryBuilder('user')
-      .addSelect('user.password')
+      .select(['user.id', 'user.username', 'user.email', 'user.password', 'user.role'])
       .where('user.username = :username', { username })
       .getOne();
-  }
-
-  async existsByUsernameOrEmail(username: string, email: string): Promise<boolean> {
-    const count = await this.repository.count({ where: [{ username }, { email }] });
-    return count > 0;
   }
 
   updateRole(id: number, role: string): Promise<UserEntity> {

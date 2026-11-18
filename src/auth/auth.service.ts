@@ -1,4 +1,4 @@
-import { ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { UserEntity } from '../user/entities/user.entity';
@@ -16,10 +16,8 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
+  // Les doublons username / email sont rejetés par les contraintes unique et convertis en 409 par UniqueViolationFilter.
   async register({ username, email, password }: RegisterDto): Promise<PublicUser> {
-    if (await this.userService.existsByUsernameOrEmail(username, email)) {
-      throw new ConflictException("Ce nom d'utilisateur ou cet email est déjà utilisé.");
-    }
     const salt = await bcrypt.genSalt();
     const user = await this.userService.create({
       username,

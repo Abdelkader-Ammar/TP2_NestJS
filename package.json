@@ -8,8 +8,7 @@
     "start": "nest start",
     "start:dev": "nest start --watch",
     "start:prod": "node dist/main.js",
-    "seed:cvs": "ts-node src/commands/cv.seeder.ts",
-    "seed:cvs:build": "nest build && node dist/commands/cv.seeder.js"
+    "seed:cvs": "ts-node src/commands/cv.seeder.ts"
   },
   "repository": {
     "type": "git",

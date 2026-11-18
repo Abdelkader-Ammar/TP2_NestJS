@@ -1,8 +1,9 @@
 import { Module } from '@nestjs/common';
+import { APP_FILTER } from '@nestjs/core';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
-import { CommonModule } from './common/common.module';
+import { UniqueViolationFilter } from './common/filters/unique-violation.filter';
 import { CvEntity } from './cv/entities/cv.entity';
 import { CvModule } from './cv/cv.module';
 import { SkillEntity } from './skill/entities/skill.entity';
@@ -13,7 +14,6 @@ import { UserModule } from './user/user.module';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
-    CommonModule,
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
@@ -28,5 +28,6 @@ import { UserModule } from './user/user.module';
     CvModule,
     AuthModule,
   ],
+  providers: [{ provide: APP_FILTER, useClass: UniqueViolationFilter }],
 })
 export class AppModule {}
